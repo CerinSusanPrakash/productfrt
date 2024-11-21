@@ -273,8 +273,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://productbk-8g59qfx1f-cerin-susan-prakashs-projects.vercel.app/');
-        // const response = await axios.get('http://localhost:5000/getproducts');
+        const response = await axios.get('http://localhost:5000/getproducts');
         if (Array.isArray(response.data)) {
           setProducts(response.data);
         } else {
@@ -303,8 +302,7 @@ const ProductPage = () => {
     }
 
     try {
-      // const response = await axios.post('http://localhost:5000/addproducts', formData);
-      const response = await axios.post('https://productbk-8g59qfx1f-cerin-susan-prakashs-projects.vercel.app/', formData);
+      const response = await axios.post('http://localhost:5000/addproducts', formData);
       setProducts([...products, response.data]);
       setFormData({ name: '', description: '', price: '' });
       setError('');
