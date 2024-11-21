@@ -9,6 +9,53 @@ const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({ name: '', description: '', price: '' });
   const [error, setError] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
+const handleEditClick = (product) => {
+  setEditingProduct(product); // Set the product being edited
+  setFormData({ name: product.name, description: product.description, price: product.price });
+};
+
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
+  if (!formData.name || !formData.description || !formData.price) {
+    setError('Please fill out all fields.');
+    return;
+  }
+
+  try {
+    if (editingProduct) {
+      // Update product
+      const response = await axios.put(
+        `https://productbk-cerin-susan-prakashs-projects.vercel.app/updateproduct/${editingProduct._id}`,
+        formData
+      );
+      setProducts(products.map((p) => (p._id === editingProduct._id ? response.data : p)));
+      setEditingProduct(null);
+    } else {
+      // Add new product
+      const response = await axios.post(
+        'https://productbk-cerin-susan-prakashs-projects.vercel.app/addproducts',
+        formData
+      );
+      setProducts([...products, response.data]);
+    }
+    setFormData({ name: '', description: '', price: '' });
+    setError('');
+  } catch (error) {
+    console.error('Error saving product:', error);
+    setError('Failed to save product. Please try again.');
+  }
+};
+const handleDeleteClick = async (id) => {
+  try {
+    await axios.delete(`https://productbk-cerin-susan-prakashs-projects.vercel.app/deleteproduct/${id}`);
+    setProducts(products.filter((product) => product._id !== id));
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    setError('Failed to delete product. Please try again.');
+  }
+};
+
 
   // Fetch products on component mount
   useEffect(() => {
@@ -97,23 +144,47 @@ const ProductPage = () => {
 
       {/* Display Products */}
       {Array.isArray(products) && products.length > 0 ? (
-        <Grid container spacing={3}>
-          {products.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product._id}>
-              <Card style={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h5" component="div">
-                    {product.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {product.description}
-                  </Typography>
-                  <Typography variant="h6" component="div" style={{ marginTop: '10px' }}>
-                    ${product.price.toFixed(2)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+        // <Grid container spacing={3}>
+        //   {products.map((product) => (
+        //     <Grid item xs={12} sm={6} md={4} key={product._id}>
+        //       <Card style={{ height: '100%' }}>
+        //         <CardContent>
+        //           <Typography variant="h5" component="div">
+        //             {product.name}
+        //           </Typography>
+        //           <Typography variant="body2" color="text.secondary">
+        //             {product.description}
+        //           </Typography>
+        //           <Typography variant="h6" component="div" style={{ marginTop: '10px' }}>
+        //             ${product.price.toFixed(2)}
+        //           </Typography>
+        //         </CardContent>
+        //       </Card>
+        //     </Grid>
+      <Grid item xs={12} sm={6} md={4} key={product._id}>
+  <Card style={{ height: '100%' }}>
+    <CardContent>
+      <Typography variant="h5" component="div">
+        {product.name}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {product.description}
+      </Typography>
+      <Typography variant="h6" component="div" style={{ marginTop: '10px' }}>
+        ${product.price.toFixed(2)}
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+        <Button variant="outlined" color="primary" onClick={() => handleEditClick(product)}>
+          Edit
+        </Button>
+        <Button variant="outlined" color="error" onClick={() => handleDeleteClick(product._id)}>
+          Delete
+        </Button>
+      </Box>
+    </CardContent>
+  </Card>
+</Grid>
+
           ))}
         </Grid>
       ) : (
